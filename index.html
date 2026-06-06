@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Chicago River Tour</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0e1a20; --river:#1e3d4f; --river-mid:#2d5a72; --water:#3a7a96;
+  --gold:#c8973a; --gold-bright:#e8b84b; --amber:#d46b2a;
+  --cream:#f2ead8; --parchment:#e8dcc8; --muted:#7a8f98;
+  --tragedy-light:#c43030; --engineering-light:#2a8a58; --crime-light:#7a3a9a;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--cream);min-height:100vh;overflow-x:hidden;}
+.water-bg{position:fixed;inset:0;z-index:0;background:linear-gradient(160deg,#0e1a20 0%,#1a3040 35%,#1e3d4f 65%,#152530 100%);}
+.water-bg::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(58,122,150,0.06) 28px,rgba(58,122,150,0.06) 29px);animation:drift 12s linear infinite;}
+@keyframes drift{to{transform:translateY(29px);}}
+
+/* SPLASH */
+.splash{position:fixed;inset:0;z-index:200;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;transition:opacity 0.6s ease;}
+.splash.gone{opacity:0;pointer-events:none;}
+.splash-rule{width:48px;height:1px;background:var(--gold);margin-bottom:24px;}
+.splash-eyebrow{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;font-weight:500;}
+.splash-title{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1.1;text-align:center;color:var(--cream);}
+.splash-title em{font-style:italic;color:var(--gold-bright);display:block;}
+.splash-sub{font-size:13px;color:var(--muted);text-align:center;line-height:1.7;max-width:280px;margin:18px 0 22px;}
+.boat-field-wrap{width:100%;max-width:280px;margin-bottom:20px;}
+.boat-field-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;display:block;}
+.boat-field{width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(200,151,58,0.3);border-radius:10px;padding:12px 14px;font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--cream);outline:none;}
+.boat-field::placeholder{color:rgba(255,255,255,0.2);}
+.splash-legend{display:flex;flex-direction:column;gap:7px;width:100%;max-width:280px;margin-bottom:24px;}
+.legend-item{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);}
+.legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.begin-btn{background:var(--gold);color:var(--ink);border:none;padding:16px 48px;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 24px rgba(200,151,58,0.3);}
+.begin-btn:active{transform:scale(0.97);}
+
+/* APP */
+.app{position:relative;z-index:1;max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding-bottom:120px;}
+
+/* HEADER */
+.header{position:relative;z-index:2;padding:20px 22px 12px;border-bottom:1px solid rgba(200,151,58,0.15);background:rgba(14,26,32,0.88);backdrop-filter:blur(10px);}
+.header-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.header-eyebrow{font-size:9px;letter-spacing:3.5px;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:3px;}
+.header-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--cream);line-height:1.15;}
+.header-title em{font-style:italic;color:var(--gold-bright);}
+.gps-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:5px 10px;flex-shrink:0;}
+.gps-dot{width:7px;height:7px;border-radius:50%;background:#555;flex-shrink:0;transition:background 0.4s;}
+.gps-dot.active{background:#4cd964;animation:gpsPulse 2.5s infinite;}
+.gps-dot.searching{background:var(--gold);animation:gpsPulse 1s infinite;}
+.gps-dot.error{background:#ff3b30;}
+@keyframes gpsPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0.3);}50%{box-shadow:0 0 0 5px transparent;}}
+.gps-label{font-size:10px;color:var(--muted);}
+.branch-row{display:flex;gap:6px;align-items:center;}
+.branch-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-right:2px;flex-shrink:0;}
+.branch-btn{flex:1;padding:7px 6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.15s;text-align:center;}
+.branch-btn.active{background:rgba(200,151,58,0.15);border-color:rgba(200,151,58,0.5);color:var(--gold);font-weight:600;}
+.branch-btn:active{transform:scale(0.97);}
+.heading-chip{font-size:9px;color:rgba(255,255,255,0.2);font-family:monospace;margin-left:4px;}
+.coord-strip{font-size:10px;color:rgba(255,255,255,0.18);font-family:monospace;margin-top:4px;}
+
+/* WOLF POINT ALERT */
+.wolf-alert{margin:10px 22px 0;background:rgba(200,151,58,0.12);border:1px solid rgba(200,151,58,0.35);border-radius:12px;padding:12px 14px;display:none;animation:riseIn 0.4s ease;}
+.wolf-alert.visible{display:block;}
+.wolf-alert-title{font-size:12px;font-weight:600;color:var(--gold);margin-bottom:4px;}
+.wolf-alert-sub{font-size:11px;color:var(--muted);line-height:1.5;}
+.wolf-btns{display:flex;gap:8px;margin-top:10px;}
+.wolf-btn{flex:1;padding:9px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--cream);cursor:pointer;transition:all 0.15s;text-align:center;}
+.wolf-btn:active{transform:scale(0.97);}
+
+/* CONTROLS */
+.controls-bar{position:relative;z-index:2;display:flex;gap:8px;padding:10px 22px 6px;background:rgba(14,26,32,0.5);}
+.ctrl-btn{flex:1;padding:9px 8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.09);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--cream);cursor:pointer;transition:all 0.15s;}
+.ctrl-btn:active{background:rgba(255,255,255,0.13);transform:scale(0.97);}
+.ctrl-btn.active-state{border-color:var(--gold);color:var(--gold);}
+.volume-bar{display:flex;align-items:center;gap:10px;padding:4px 22px 10px;background:rgba(14,26,32,0.5);}
+.vol-slider{flex:1;-webkit-appearance:none;height:2px;background:rgba(255,255,255,0.12);border-radius:2px;outline:none;}
+.vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;}
+
+/* NOW CARD */
+.now-wrap{position:relative;z-index:2;padding:10px 22px 4px;}
+.now-card{background:var(--parchment);border-radius:16px;overflow:hidden;box-shadow:0 12px 48px rgba(0,0,0,0.4);display:none;animation:riseIn 0.45s cubic-bezier(0.22,1,0.36,1);}
+.now-card.visible{display:block;}
+@keyframes riseIn{from{opacity:0;transform:translateY(20px) scale(0.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.now-card-accent{height:4px;background:var(--gold);}
+.now-card-accent.tragedy{background:var(--tragedy-light);}
+.now-card-accent.engineering{background:var(--engineering-light);}
+.now-card-accent.crime{background:var(--crime-light);}
+.now-card-accent.history{background:var(--amber);}
+.now-card-accent.neighborhood{background:var(--muted);}
+.now-card-body{padding:14px 16px 16px;}
+.now-type-tag{display:inline-block;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;padding:3px 8px;border-radius:4px;margin-bottom:7px;background:rgba(200,151,58,0.15);color:var(--gold);}
+.now-type-tag.tragedy{background:rgba(196,48,48,0.12);color:var(--tragedy-light);}
+.now-type-tag.engineering{background:rgba(42,138,88,0.12);color:var(--engineering-light);}
+.now-type-tag.crime{background:rgba(122,58,154,0.12);color:var(--crime-light);}
+.now-type-tag.history{background:rgba(212,107,42,0.12);color:var(--amber);}
+.now-title{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;color:var(--ink);line-height:1.2;margin-bottom:2px;}
+.now-year{font-size:11px;color:#888;margin-bottom:10px;}
+.now-text{font-size:14px;line-height:1.7;color:#2a2a2a;}
+.now-footer{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.08);}
+.wave-bars{display:flex;align-items:flex-end;gap:2px;height:14px;}
+.wave-bar{width:3px;background:var(--river-mid);border-radius:2px;animation:waveAnim 0.9s ease-in-out infinite;}
+.wave-bar:nth-child(1){animation-delay:0s;}.wave-bar:nth-child(2){animation-delay:0.12s;}
+.wave-bar:nth-child(3){animation-delay:0.24s;}.wave-bar:nth-child(4){animation-delay:0.16s;}
+.wave-bar:nth-child(5){animation-delay:0.08s;}
+@keyframes waveAnim{0%,100%{height:3px;}50%{height:13px;}}
+.now-speaking-label{font-size:11px;color:#888;}
+.now-generating{font-size:11px;color:var(--amber);}
+.dot-pulse::after{content:'...';animation:dots 1.4s infinite;}
+@keyframes dots{0%,100%{content:'.';}40%{content:'..';}70%{content:'...'}}
+
+/* DEBUG */
+.debug-bar{position:relative;z-index:2;padding:3px 22px 6px;background:rgba(14,26,32,0.5);}
+.debug-text{font-size:10px;color:rgba(255,255,255,0.22);font-family:monospace;line-height:1.4;min-height:13px;}
+
+/* LIST */
+.section-header{position:relative;z-index:2;display:flex;align-items:center;gap:12px;padding:14px 22px 8px;}
+.section-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:500;}
+.section-rule{flex:1;height:1px;background:rgba(200,151,58,0.15);}
+.landmark-list{position:relative;z-index:2;padding:0 22px;display:flex;flex-direction:column;gap:6px;}
+.lm-item{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all 0.18s;position:relative;overflow:hidden;}
+.lm-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.lm-item.type-architecture::before{background:var(--water);}
+.lm-item.type-tragedy::before{background:var(--tragedy-light);}
+.lm-item.type-engineering::before{background:var(--engineering-light);}
+.lm-item.type-crime::before{background:var(--crime-light);}
+.lm-item.type-history::before{background:var(--amber);}
+.lm-item.type-neighborhood::before{background:var(--muted);}
+.lm-item.type-fork::before{background:var(--gold);}
+.lm-item.nearby{background:rgba(200,151,58,0.07);border-color:rgba(200,151,58,0.25);}
+.lm-item.visited{opacity:0.35;}
+.lm-item:active{transform:scale(0.98);}
+.lm-dist{font-size:11px;color:var(--gold);font-weight:600;width:38px;text-align:center;flex-shrink:0;}
+.lm-body{flex:1;min-width:0;}
+.lm-name{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:var(--cream);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lm-meta{font-size:11px;color:var(--muted);margin-top:1px;}
+.lm-badge{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;padding:2px 6px;border-radius:4px;flex-shrink:0;}
+.badge-architecture{background:rgba(58,122,150,0.2);color:#7abcd4;}
+.badge-tragedy{background:rgba(196,48,48,0.2);color:#e07070;}
+.badge-engineering{background:rgba(42,138,88,0.2);color:#60c090;}
+.badge-crime{background:rgba(122,58,154,0.2);color:#b080d0;}
+.badge-history{background:rgba(212,107,42,0.2);color:#e0904a;}
+.badge-neighborhood{background:rgba(122,143,152,0.2);color:#a0b8c0;}
+.badge-fork{background:rgba(200,151,58,0.2);color:var(--gold);}
+</style>
+</head>
+<body>
+<div class="water-bg"></div>
+
+<div class="splash" id="splash">
+  <div class="splash-rule"></div>
+  <div class="splash-eyebrow">Audio · GPS · Self-Guided</div>
+  <div class="splash-title">Chicago River<em>History & Architecture</em></div>
+  <div class="splash-sub">Hands-free narration triggered by your location. Architecture, disasters, engineering feats, and stories the buildings don't tell you.</div>
+  <div class="boat-field-wrap">
+    <label class="boat-field-label">Vessel Name (optional)</label>
+    <input class="boat-field" id="boatNameInput" type="text" placeholder="Sojourn" value="Sojourn" maxlength="30">
+  </div>
+  <div class="splash-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#7abcd4"></div>Architecture</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e07070"></div>Tragedy / disaster</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#60c090"></div>Engineering feat</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#b080d0"></div>Crime & underworld</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e0904a"></div>History & culture</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Navigation fork</div>
+  </div>
+  <button class="begin-btn" onclick="startTour()">Begin Tour</button>
+</div>
+
+<div class="app">
+  <div class="header">
+    <div class="header-row1">
+      <div>
+        <div class="header-eyebrow">Chicago River · Architecture & History</div>
+        <div class="header-title">On the Water,<br><em>In the Story</em></div>
+      </div>
+      <div class="gps-badge">
+        <div class="gps-dot searching" id="gpsDot"></div>
+        <span class="gps-label" id="gpsLabel">Locating…</span>
+      </div>
+    </div>
+    <div class="branch-row">
+      <span class="branch-label">Branch</span>
+      <button class="branch-btn active" id="btnMain" onclick="setBranch('main',true)">Main</button>
+      <button class="branch-btn" id="btnNorth" onclick="setBranch('north',true)">North</button>
+      <button class="branch-btn" id="btnSouth" onclick="setBranch('south',true)">South</button>
+      <span class="heading-chip" id="headingChip"></span>
+    </div>
+    <div class="coord-strip" id="coordStrip">&nbsp;</div>
+  </div>
+
+  <div class="wolf-alert" id="wolfAlert">
+    <div class="wolf-alert-title">🔱 Wolf Point — Choose Your Branch</div>
+    <div class="wolf-alert-sub" id="wolfSub">You're at the fork. Which way are you headed?</div>
+    <div class="wolf-btns">
+      <div class="wolf-btn" onclick="selectBranchFromWolf('north')">↑ North Branch<br><span style="font-size:10px;opacity:0.6">Goose Island</span></div>
+      <div class="wolf-btn" onclick="selectBranchFromWolf('south')">↓ South Branch<br><span style="font-size:10px;opacity:0.6">Chinatown</span></div>
+    </div>
+  </div>
+
+  <div class="controls-bar">
+    <button class="ctrl-btn" id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
+    <button class="ctrl-btn" onclick="replayLast()">↺ Replay</button>
+    <button class="ctrl-btn" onclick="skipCurrent()">Skip ›</button>
+  </div>
+  <div class="volume-bar">
+    <span style="font-size:13px">🔈</span>
+    <input type="range" class="vol-slider" id="volSlider" min="0" max="1" step="0.05" value="0.9" oninput="setVolume(this.value)">
+    <span style="font-size:13px">🔊</span>
+  </div>
+
+  <div class="now-wrap">
+    <div class="now-card" id="nowCard">
+      <div class="now-card-accent" id="nowAccent"></div>
+      <div class="now-card-body">
+        <div class="now-type-tag" id="nowTag">Architecture</div>
+        <div class="now-title" id="nowTitle">—</div>
+        <div class="now-year" id="nowYear"></div>
+        <div class="now-text" id="nowText"></div>
+        <div class="now-footer" id="nowFooter" style="display:none">
+          <div class="wave-bars">
+            <div class="wave-bar" style="height:4px"></div>
+            <div class="wave-bar" style="height:9px"></div>
+            <div class="wave-bar" style="height:13px"></div>
+            <div class="wave-bar" style="height:7px"></div>
+            <div class="wave-bar" style="height:4px"></div>
+          </div>
+          <span class="now-speaking-label" id="speakLabel">Speaking…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="debug-bar"><div class="debug-text" id="debugText">—</div></div>
+
+  <div class="section-header">
+    <span class="section-label">Route Landmarks</span>
+    <div class="section-rule"></div>
+  </div>
+  <div class="landmark-list" id="landmarkList"></div>
+</div>
+
+<script>
+// ── API CONFIG ───────────────────────────────────────────────────
+const ELEVEN_API_KEY  = 'sk_00ec5a38d4e0da2dfff8dbc66ba8d04065dba5deda8ed694';
+const ELEVEN_VOICE_ID = 'pFZP5JQG7iQjIQuC4Bku';
+const ELEVEN_MODEL    = 'eleven_turbo_v2_5';
+
+// ── PRE-WRITTEN NARRATION SCRIPTS ────────────────────────────────
+// All scripts pre-written with orientation language baked in.
+// No Anthropic API call required at runtime.
+const SCRIPTS = {
+'dusable-lock':`Straight ahead at the center of the river — you're passing through the DuSable Lock, the gateway between Lake Michigan and the entire Chicago River system. It's named for Jean Baptiste Point DuSable, a Haitian-born fur trader who built his home right here around 1790, making him Chicago's true founder — not the European settlers who came later. This lock connects the Great Lakes to the Gulf of Mexico via the Illinois Waterway. And the river you're about to travel? It flows backwards. In 1900, engineers reversed its direction entirely to stop sewage from poisoning the lake. They literally made a river defy nature.`,
+'river-reversal':`The water moving beneath you right now is flowing the wrong way — and has been for over a century. In 1900, the Sanitary District of Chicago completed one of the most audacious engineering projects in American history, digging the 28-mile Chicago Sanitary and Ship Canal to reverse the river's flow away from Lake Michigan. Before this, the river carried the city's sewage directly into the drinking water supply, causing cholera outbreaks that killed thousands. When they opened the controlling works on January 2nd, 1900, the river began flowing backwards. St. Louis sued all the way to the Supreme Court. Chicago won. It flows backwards still.`,
+'michigan-ave-bridge':`You're passing beneath one of the most beautiful movable bridges in the world — the DuSable Bridge, renamed in 2010 to honor Chicago's true founder. Chicago has more movable bridges than any city on Earth, over 37 on the river alone. But directly below where you're floating right now was the site of Fort Dearborn, established in 1803, and the Fort Dearborn Massacre of 1812, when Potawatomi warriors killed 52 soldiers and settlers as they evacuated. The bronze markers are in the sidewalk above you. And look up at the bridgehouse — bas-relief sculptures of Chicago history are carved into its stone. The city was born in blood on this spot.`,
+'wrigley':`To starboard on the north bank — that gleaming white tower is the Wrigley Building, and William Wrigley Jr. built it to be impossible to ignore. The architects clad it in 250,000 glazed terra-cotta tiles in six graduated shades of white — darker at the base, lighter at the crown — so it appears to glow from within even on a grey Chicago day. At night, floodlights made it one of the first illuminated skyscrapers in the city. Wrigley made his fortune selling chewing gum and wanted the world to know it. Those clock faces on the tower? Each one is roughly 19 feet in diameter. Larger than the face of Big Ben.`,
+'tribune':`To starboard, still on the north bank — Tribune Tower, the result of the most famous architectural competition in history. In 1922, the Chicago Tribune offered $100,000 for the most beautiful office building in the world. Two hundred sixty-three entries from 23 countries. The winning neo-Gothic design drew outrage from modernists. But look at the base of the tower as you pass — embedded in the stone are fragments from 149 landmarks worldwide. The Parthenon. The Taj Mahal. The Great Wall. The Berlin Wall. Even a piece of the moon. Tribune correspondents collected them over decades. A medieval silhouette housing a 20th century newspaper. Only in Chicago.`,
+'eastland':`Hold a moment here. To starboard, on the north bank — this is the Clark Street dock, the site of the deadliest single-event disaster in Chicago history. On July 24th, 1915, the steamship SS Eastland was tied right here, preparing to carry 2,500 Western Electric employees across the lake for a company picnic. The ship had a known stability problem. As passengers crowded the upper decks to wave goodbye, the Eastland rolled slowly to port — and capsized, still tied to the dock, in just twenty feet of water. Eight hundred forty-four people drowned. Entire families, gone. Mostly young Czech and Bohemian factory workers. It should be as famous as the Great Fire. It is not.`,
+'marina-city':`To starboard on the north bank — those twin corncob towers are Marina City, among the most original buildings ever constructed anywhere in the world. Bertrand Goldberg designed them in 1967 as a direct response to white flight — a self-contained urban village so complete that residents would never need to leave downtown. Each tower has forty floors of pie-shaped apartments above eighteen floors of parking that spiral up the exterior like a corkscrew. The boat slips at the base still operate — look for them right at river level. When Marina City opened it was the tallest concrete structure on Earth. From the water, those cantilevered balconies look almost biological. That was entirely intentional.`,
+'trump':`To starboard on the north bank, the tower stepping down in three distinct setbacks — that's Trump International, the second-tallest building in Chicago at 1,389 feet. Architect Adrian Smith, who later designed the Burj Khalifa, calibrated each setback to match the roofline of a neighboring building — Wrigley, Marina City, and the IBM tower. It's a building in conversation with its context. It was originally planned to be the tallest building in the world, but the September 11th attacks caused the developers to scale back. The building sits on the site of the old Chicago Sun-Times printing plant. The spire was added at the city's request. It works.`,
+'ibm-mies':`To starboard on the north bank — that austere dark tower of steel and glass was Ludwig Mies van der Rohe's final American commission, completed just before his death in 1969. Mies arrived in Chicago in 1938 as a refugee from Nazi Germany, where the Bauhaus school he led had been forcibly shut down. He spent the next three decades transforming how this city — and every city — thought about buildings. His philosophy was absolute: less is more. Steel frames expressed honestly. Glass curtain walls. No ornament, no decoration, no dishonesty of any kind. This building is that philosophy at its most refined. Chicago without Mies van der Rohe would look entirely different.`,
+'333-wacker':`To starboard at the bend — that sweeping arc of green glass is 333 West Wacker Drive, and it may be the most purely joyful skyscraper in Chicago. Kohn Pedersen Fox designed the facade to follow the curve of the river bend precisely, so from the water it reads as a perfect unbroken arc. The glass color — that particular shade of reflective green — was chosen to mirror the Chicago River itself. On a clear day it does exactly that. You're looking at the river reflected back at you. The architects saw the bend and thought: the building should bend with it. It's one of those rare cases where the obvious solution was also the brilliant one.`,
+'merch-mart':`To starboard on the north bank — the Merchandise Mart. When it opened in 1930 it was the largest building in the world by floor area, 4.2 million square feet, holding that title until the Pentagon was completed in 1943. In 1945, Joseph Kennedy bought it for twelve and a half million dollars after being tipped off it was undervalued. The Kennedy family owned it for 57 years. It became one of the most profitable pieces of real estate in American history and was so large it had its own ZIP code. Those busts of great merchants along the river facade include Julius Rosenwald of Sears — but not Marshall Field, who actually built the place. That omission has always puzzled historians.`,
+'wolf-point':`Bring Sojourn to the center of the fork — this is Wolf Point, the geographic heart of Chicago, where the river divides into north and south branches. This is where the city began. The first tavern in Chicago history stood on this bank around 1828, one of the earliest gathering places of what would become the greatest city in the American interior. For decades, Wolf Point was the chaotic center of river traffic, fur trading, and frontier commerce. Today those three residential towers are Wolf Point East, West, and South, developed by the Kennedy family. Preservationists felt this site deserved something more architecturally ambitious. They were right. Choose your branch — north toward Goose Island, or south toward Chinatown.`,
+'civic-opera':`To port on the west bank — the Civic Opera Building was Samuel Insull's cathedral to power, and his monument to spite. Insull was a utility tycoon who loathed New York's cultural dominance and was determined Chicago would have the world's greatest opera house. The building was designed to look like a throne from above — the main tower is the back, the flanking office buildings are the armrests, the opera house is the seat. New Yorkers called it Insull's Throne. Insull went spectacularly bankrupt in 1932, fled to Europe, was extradited back, tried for fraud, and acquitted. He died in Paris in 1938 with less than a thousand dollars to his name. The opera house still stands. It is still magnificent.`,
+'flood-1992':`Somewhere directly beneath the river right now runs a forgotten network of 62 miles of brick freight tunnels, built in the early 1900s to move coal and mail between downtown buildings. On April 13th, 1992, a contractor driving anchor pilings for a new bridge accidentally breached the tunnel wall next to the Chicago River. Water began pouring in and spread under the entire Loop. It took three days before anyone on the surface realized what was happening. By then, 250 million gallons had flooded basements across downtown — the Board of Trade, City Hall, Marshall Field's. The damage exceeded a billion dollars. From the street you couldn't see a thing. The disaster was entirely underground. Those tunnels still exist beneath you right now.`,
+'old-post-office':`To port on the west bank — the Old Chicago Main Post Office, remarkable for a single reason: a major American interstate highway runs directly through its middle. The Eisenhower Expressway passes through the building's core, which was designed around it from the start. For decades this was the largest post office in the world. After the postal service downsized in the 1990s it sat empty for over 20 years — a vast derelict Art Deco hulk rotting on the river. The restoration that reopened it in 2019 is one of Chicago's great adaptive reuse stories, now housing thousands of workers. The highway still runs through it. The highway will always run through it.`,
+'willis-tower':`To port on the east bank, that massive bundled tower dominating the skyline — Willis Tower, which every person in Chicago still calls Sears Tower and always will. For 25 years after it was completed in 1973 it was the tallest building on Earth. Engineer Fazlur Khan invented the structural system that made it possible: the bundled tube, nine steel tubes of varying heights grouped together like a fist of straws. The system was so elegant it changed how supertall skyscrapers are built everywhere in the world. The building sways up to three feet at the top in strong wind. Sears commissioned it as their world headquarters, then moved to the suburbs in 1992. It was renamed Willis Tower in 2009. No one accepted this.`,
+'capone-river':`The water around you was once one of the primary arteries of organized crime in America. During Prohibition — 1920 to 1933 — Al Capone's Outfit used the Chicago River's network of bridges, warehouses, and riverfront facilities to move bootleg liquor and avoid federal agents. Corruption of the police and city government was so comprehensive that the Outfit operated largely in the open. The St. Valentine's Day Massacre of 1929, when seven gangsters were machine-gunned in a North Side garage, effectively ended the war between Capone's South Side Outfit and Bugs Moran's North Side gang. Capone was never tried for the massacre. He was convicted of tax evasion in 1931. Brought down not by the FBI. By accountants.`,
+'green-river':`The water moving beneath you turns bright fluorescent green every St. Patrick's Day — a tradition that began in 1962 when a city plumber named Stephen Bailey noticed that the dye he used to trace illegal sewage discharges turned the river green. He suggested to parade organizer and Democratic party boss Richard J. Daley that they do it intentionally. The first year they used a hundred pounds of dye and the river stayed green for a week. Now about forty pounds of an orange powder that turns fluorescent green on contact with water keeps the color for roughly five hours. The dyeing is performed by the Chicago Journeymen Plumbers Local 130, who consider it a sacred civic honor. No city on Earth does anything like it.`,
+'great-fire':`The South Branch of the river you're on right now acted as a firebreak that helped contain the Great Chicago Fire of October 1871. The fire burned for two days, destroyed four square miles of the city, killed an estimated 300 people, and left 100,000 homeless. The famous story of Mrs. O'Leary's cow kicking over a lantern was almost certainly invented by a reporter named Michael Ahern, who admitted the fabrication decades later. The fire swept northeast driven by powerful wind and wood-frame construction. This waterway helped stop it from spreading further west. The rebuilding that followed was extraordinary — Chicago rebuilt in masonry and stone within two years, creating the conditions for the architectural revolution that made this skyline possible.`,
+'goose-island':`To starboard on the east bank — that's Goose Island, a genuine island about a mile long, created when the North Branch Canal was dug in 1853. The east channel is impassable, so you're running the west side with the island to starboard. The neighborhood here was once called Little Hell — one of the roughest in Chicago — because soot from coal gasification plants covered every surface in black grime. Irish immigrants settled it first, then factories displaced them entirely. Today the anchor tenant is the Goose Island Brewery, founded in 1988 and named for this island. Some old industrial character remains — printing plants, fabricators, warehouses — but the area is changing fast. An actual island in an actual city, hiding in plain sight.`,
+'north-branch':`To port on the west bank — the mainland side of the North Branch represents one of Chicago's quiet environmental victories. For most of the 20th century the North Branch was one of the most polluted urban waterways in North America. Tanneries, slaughterhouses, and chemical plants lined these banks for generations. Beginning in the late 1990s, the Friends of the Chicago River and eventually the city began a sustained restoration — native plantings, contamination cleanup, restoration of buried tributary streams. Today herons nest along these banks. Beaver have returned. There are occasional river otters. Chicago is one of the few cities on Earth to have genuinely begun healing an industrial river running through its living core.`,
+'chinatown':`To starboard on the east bank — Ping Tom Memorial Park, the southern end of your journey on the South Branch. Named for a Chicago alderman who died in 1995, it represents a deliberate reconnection between Chicago's Chinatown and its waterfront. For most of Chinatown's history dating to the 1870s, the community was physically cut off from the river by rail yards and industrial infrastructure. This park broke through that barrier. The pagoda-style boathouse at the river's edge opened in 2013 and is a genuine piece of considered architecture. Chinatown itself, a few blocks east on Wentworth Avenue, is one of the most intact Chinese-American communities in the Midwest. You've traveled the full South Branch. Turn Sojourn around — the river has more to tell you going north.`,
+};
+
+// ── LANDMARKS ────────────────────────────────────────────────────
+const LANDMARKS = [
+  {id:'dusable-lock',type:'engineering',name:"DuSable Lock & Chicago Harbor Lock",year:"1938",lat:41.8878,lng:-87.6189,radius:180,branch:'main'},
+  {id:'river-reversal',type:'engineering',name:"The Chicago River Reversal",year:"1900",lat:41.8870,lng:-87.6220,radius:160,branch:'main'},
+  {id:'michigan-ave-bridge',type:'history',name:"DuSable Bridge (Michigan Avenue Bridge)",year:"1920",lat:41.8877,lng:-87.6244,radius:130,branch:'main'},
+  {id:'wrigley',type:'architecture',name:"Wrigley Building",year:"1924",lat:41.8878,lng:-87.6261,radius:130,branch:'main'},
+  {id:'tribune',type:'architecture',name:"Tribune Tower",year:"1925",lat:41.8882,lng:-87.6243,radius:120,branch:'main'},
+  {id:'eastland',type:'tragedy',name:"Eastland Disaster Site — Clark Street Dock",year:"July 24, 1915",lat:41.8874,lng:-87.6320,radius:140,branch:'main'},
+  {id:'marina-city',type:'architecture',name:"Marina City",year:"1967",lat:41.8876,lng:-87.6283,radius:130,branch:'main'},
+  {id:'trump',type:'architecture',name:"Trump International Hotel & Tower",year:"2009",lat:41.8888,lng:-87.6267,radius:130,branch:'main'},
+  {id:'ibm-mies',type:'architecture',name:"One IBM Plaza — Mies van der Rohe's Last Tower",year:"1971",lat:41.8891,lng:-87.6295,radius:120,branch:'main'},
+  {id:'333-wacker',type:'architecture',name:"333 West Wacker Drive",year:"1983",lat:41.8862,lng:-87.6368,radius:120,branch:'main'},
+  {id:'merch-mart',type:'history',name:"The Merchandise Mart",year:"1930",lat:41.8882,lng:-87.6356,radius:160,branch:'main'},
+  {id:'wolf-point',type:'fork',name:"Wolf Point — The Fork",year:"Est. 1828",lat:41.8882,lng:-87.6378,radius:150,branch:'main',fork:true},
+  {id:'civic-opera',type:'architecture',name:"Civic Opera Building",year:"1929",lat:41.8847,lng:-87.6378,radius:130,branch:'south'},
+  {id:'flood-1992',type:'history',name:"The Great Chicago Flood — Tunnels Below",year:"April 1992",lat:41.8820,lng:-87.6350,radius:200,branch:'south'},
+  {id:'old-post-office',type:'history',name:"The Old Chicago Main Post Office",year:"1921 / Restored 2019",lat:41.8762,lng:-87.6404,radius:200,branch:'south'},
+  {id:'willis-tower',type:'architecture',name:"Willis Tower (Sears Tower)",year:"1973",lat:41.8789,lng:-87.6359,radius:160,branch:'south'},
+  {id:'capone-river',type:'crime',name:"Capone's Chicago — The River's Prohibition Past",year:"1920–1933",lat:41.8830,lng:-87.6340,radius:220,branch:'main'},
+  {id:'green-river',type:'history',name:"The Green River — A Chicago Tradition",year:"Since 1962",lat:41.8872,lng:-87.6280,radius:250,branch:'all'},
+  {id:'great-fire',type:'tragedy',name:"The Great Chicago Fire — Where the River Held",year:"October 1871",lat:41.8840,lng:-87.6360,radius:200,branch:'south'},
+  {id:'goose-island',type:'history',name:"Goose Island",year:"",lat:41.9106,lng:-87.6519,radius:260,branch:'north'},
+  {id:'north-branch',type:'history',name:"The North Branch — Industrial to Natural",year:"",lat:41.9050,lng:-87.6480,radius:220,branch:'north'},
+  {id:'chinatown',type:'neighborhood',name:"Chinatown & Ping Tom Memorial Park",year:"",lat:41.8516,lng:-87.6318,radius:260,branch:'south'},
+];
+
+// ── STATE ────────────────────────────────────────────────────────
+let userLat=null,userLng=null,paused=false,narrating=false;
+let visitedIds=new Set(),lastNarratedId=null,lastSpokenText='';
+let sharedAudio=null,volume=0.9,generatingId=null;
+let currentBranch='main',manualBranchOverride=false;
+let currentHeading=null,prevLat=null,prevLng=null;
+let boatName='Sojourn';
+const TYPE_LABELS={architecture:'Architecture',tragedy:'Tragedy',engineering:'Engineering',crime:'Underworld',history:'History',neighborhood:'Neighborhood',fork:'Fork'};
+
+function dbg(msg){console.log('[Tour]',msg);document.getElementById('debugText').textContent=msg;}
+
+// ── AUDIO UNLOCK ─────────────────────────────────────────────────
+function unlockAudio(){
+  const silence=new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+  silence.play().catch(()=>{});
+  dbg('Audio unlocked');
+}
+
+// ── START ─────────────────────────────────────────────────────────
+function startTour(){
+  boatName=document.getElementById('boatNameInput').value.trim()||'Sojourn';
+  document.getElementById('wolfSub').textContent=`You're at the fork. Which way is ${boatName} headed?`;
+  unlockAudio();
+  document.getElementById('splash').classList.add('gone');
+  initGPS(); renderList();
+}
+
+// ── GPS ───────────────────────────────────────────────────────────
+function initGPS(){
+  if(!navigator.geolocation){setGPS('error','GPS unavailable');return;}
+  setGPS('searching','Locating…');
+  navigator.geolocation.watchPosition(onPos,onGPSErr,{enableHighAccuracy:true,maximumAge:3000,timeout:25000});
+}
+function onPos(pos){
+  const lat=pos.coords.latitude,lng=pos.coords.longitude,acc=Math.round(pos.coords.accuracy);
+  if(prevLat!==null&&prevLng!==null){
+    const dLat=lat-prevLat,dLng=lng-prevLng;
+    if(Math.abs(dLat)>0.00003||Math.abs(dLng)>0.00003){
+      currentHeading=Math.atan2(dLng,dLat)*180/Math.PI;
+      if(currentHeading<0)currentHeading+=360;
+      document.getElementById('headingChip').textContent=Math.round(currentHeading)+'°';
+      if(!manualBranchOverride)autoDetectBranch(lat,lng,currentHeading);
+    }
+  }
+  prevLat=lat;prevLng=lng;userLat=lat;userLng=lng;
+  setGPS('active',`±${acc}m`);
+  document.getElementById('coordStrip').textContent=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  checkProximity();renderList();
+}
+function onGPSErr(e){setGPS('error','No GPS');dbg('GPS err: '+e.message);}
+function setGPS(state,label){
+  document.getElementById('gpsDot').className='gps-dot '+state;
+  document.getElementById('gpsLabel').textContent=label;
+}
+
+// ── HEADING / BRANCH ──────────────────────────────────────────────
+function autoDetectBranch(lat,lng,heading){
+  const atFork=haversine(lat,lng,41.8882,-87.6378)<300;
+  if(atFork)return;
+  let detected=null;
+  if((heading>315||heading<45)||(heading>135&&heading<225)){
+    if(lng<-87.645){detected=heading<90||heading>270?'north':'south';}
+  } else {
+    if(lat>41.885&&lat<41.892)detected='main';
+  }
+  if(detected&&detected!==currentBranch){setBranch(detected,false);dbg('Auto branch: '+detected);}
+}
+function setBranch(branch,manual){
+  currentBranch=branch;
+  if(manual)manualBranchOverride=true;
+  ['main','north','south'].forEach(b=>{
+    document.getElementById('btn'+b.charAt(0).toUpperCase()+b.slice(1)).classList.toggle('active',b===branch);
+  });
+  dbg('Branch: '+branch+(manual?' (manual)':' (auto)'));
+  renderList();
+}
+function selectBranchFromWolf(branch){
+  setBranch(branch,true);
+  document.getElementById('wolfAlert').classList.remove('visible');
+}
+
+// ── PROXIMITY ────────────────────────────────────────────────────
+function checkProximity(){
+  if(!userLat||paused||narrating)return;
+  let closest=null,closestDist=Infinity;
+  for(const lm of LANDMARKS){
+    if(visitedIds.has(lm.id)||generatingId===lm.id)continue;
+    if(lm.branch!=='all'&&lm.branch!==currentBranch)continue;
+    const d=haversine(userLat,userLng,lm.lat,lm.lng);
+    if(d<=lm.radius&&d<closestDist){closest=lm;closestDist=d;}
+  }
+  if(closest)triggerNarration(closest);
+}
+
+// ── NARRATION ────────────────────────────────────────────────────
+async function triggerNarration(lm){
+  if(lm.fork){
+    // Show branch selector if heading ambiguous
+    const headingConfident=currentHeading!==null;
+    if(!headingConfident){
+      document.getElementById('wolfAlert').classList.add('visible');
+    }
+  }
+  generatingId=lm.id;narrating=true;
+  lastNarratedId=lm.id;visitedIds.add(lm.id);
+  const script=SCRIPTS[lm.id]||lm.name+'. '+( lm.context||'');
+  lastSpokenText=script;
+  showCard(lm,script);renderList();
+  setWave(true,'Speaking…');
+  try{
+    await speakElevenLabs(script);
+  }catch(e){
+    dbg('ElevenLabs failed: '+e.message+' — browser fallback');
+    await speakFallback(script).catch(()=>{});
+  }finally{
+    narrating=false;generatingId=null;setWave(false);
+    if(lm.fork){
+      document.getElementById('wolfAlert').classList.add('visible');
+    }
+  }
+}
+
+// ── ELEVENLABS ────────────────────────────────────────────────────
+async function speakElevenLabs(text){
+  dbg(`ElevenLabs: ${text.length} chars`);
+  const resp=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','xi-api-key':ELEVEN_API_KEY},
+    body:JSON.stringify({text,model_id:ELEVEN_MODEL,voice_settings:{stability:0.45,similarity_boost:0.82,style:0.28,use_speaker_boost:true}})
+  });
+  if(!resp.ok){const e=await resp.text();throw new Error('ElevenLabs '+resp.status+': '+e);}
+  dbg('Audio received — playing');
+  const blob=await resp.blob();
+  const url=URL.createObjectURL(blob);
+  const audio=new Audio(url);
+  audio.volume=volume;
+  sharedAudio=audio;
+  return new Promise((resolve,reject)=>{
+    audio.onended=()=>{URL.revokeObjectURL(url);dbg('Playback complete ✓');resolve();};
+    audio.onerror=(e)=>{
+      URL.revokeObjectURL(url);
+      const code=e.target&&e.target.error?e.target.error.code:'?';
+      dbg('Audio error code: '+code);
+      reject(new Error('Audio error '+code));
+    };
+    audio.play().then(()=>dbg('Playing ✓')).catch(e=>{
+      URL.revokeObjectURL(url);
+      dbg('play() rejected: '+e.name+': '+e.message);
+      reject(e);
+    });
+  });
+}
+
+// ── FALLBACK TTS ──────────────────────────────────────────────────
+function speakFallback(text){
+  return new Promise(resolve=>{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.volume=volume;u.rate=0.91;
+    const voices=speechSynthesis.getVoices();
+    const pick=voices.find(v=>v.name.includes('Samantha')||v.name.includes('Aaron')||v.lang==='en-US');
+    if(pick)u.voice=pick;
+    u.onend=resolve;u.onerror=resolve;
+    speechSynthesis.speak(u);
+  });
+}
+
+// ── CONTROLS ──────────────────────────────────────────────────────
+function togglePause(){
+  paused=!paused;
+  const btn=document.getElementById('pauseBtn');
+  if(paused){if(sharedAudio)sharedAudio.pause();btn.textContent='▶ Resume';btn.classList.add('active-state');}
+  else{if(sharedAudio)sharedAudio.play().catch(()=>{});btn.textContent='⏸ Pause';btn.classList.remove('active-state');checkProximity();}
+}
+function replayLast(){
+  if(!lastSpokenText)return;
+  const lm=LANDMARKS.find(l=>l.id===lastNarratedId);
+  if(lm)showCard(lm,lastSpokenText);
+  setWave(true,'Speaking…');
+  speakElevenLabs(lastSpokenText).catch(()=>speakFallback(lastSpokenText)).finally(()=>setWave(false));
+}
+function skipCurrent(){
+  if(sharedAudio){sharedAudio.pause();}
+  speechSynthesis.cancel();
+  narrating=false;generatingId=null;setWave(false);dbg('Skipped');
+}
+function setVolume(v){
+  volume=parseFloat(v);
+  if(sharedAudio)sharedAudio.volume=volume;
+}
+function manualNarrate(id){
+  const lm=LANDMARKS.find(l=>l.id===id);
+  if(!lm||narrating)return;
+  visitedIds.delete(id);
+  triggerNarration(lm);
+}
+
+// ── CARD ──────────────────────────────────────────────────────────
+function showCard(lm,text){
+  const card=document.getElementById('nowCard');
+  document.getElementById('nowAccent').className='now-card-accent '+lm.type;
+  const tag=document.getElementById('nowTag');
+  tag.className='now-type-tag '+lm.type;
+  tag.textContent=TYPE_LABELS[lm.type]||lm.type;
+  document.getElementById('nowTitle').textContent=lm.name;
+  document.getElementById('nowYear').textContent=lm.year||'';
+  document.getElementById('nowText').textContent=text||'';
+  card.classList.remove('visible');
+  void card.offsetWidth;
+  card.classList.add('visible');
+}
+function setWave(on,label){
+  document.getElementById('nowFooter').style.display=on?'flex':'none';
+  if(label)document.getElementById('speakLabel').textContent=label;
+}
+
+// ── LIST ──────────────────────────────────────────────────────────
+function renderList(){
+  const sorted=[...LANDMARKS].sort((a,b)=>{
+    if(!userLat)return 0;
+    return haversine(userLat,userLng,a.lat,a.lng)-haversine(userLat,userLng,b.lat,b.lng);
+  });
+  document.getElementById('landmarkList').innerHTML=sorted.map(lm=>{
+    const dist=userLat?haversine(userLat,userLng,lm.lat,lm.lng):null;
+    const nearby=dist&&dist<lm.radius*1.8;
+    const visited=visitedIds.has(lm.id);
+    const onBranch=lm.branch==='all'||lm.branch===currentBranch;
+    return `<div class="lm-item type-${lm.type} ${nearby?'nearby':''} ${visited?'visited':''}" style="${!onBranch?'opacity:0.2':''}" onclick="manualNarrate('${lm.id}')">
+      <div class="lm-dist">${dist?fmtDist(dist):'—'}</div>
+      <div class="lm-body">
+        <div class="lm-name">${lm.name}</div>
+        <div class="lm-meta">${lm.year||'Historic site'}${visited?' · ✓ Narrated':''}</div>
+      </div>
+      <div class="lm-badge badge-${lm.type}">${TYPE_LABELS[lm.type]||lm.type}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────
+function haversine(a,b,c,d){
+  const R=6371000,dLat=(c-a)*Math.PI/180,dLng=(d-b)*Math.PI/180;
+  const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function fmtDist(m){return m<1000?Math.round(m)+'m':(m/1000).toFixed(1)+'km';}
+
+// ── POLL ──────────────────────────────────────────────────────────
+setInterval(()=>{if(!paused&&userLat){checkProximity();renderList();}},9000);
+speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();
+</script>
+</body>
+</html>
